@@ -31,14 +31,6 @@ public class SalesStatistics {
         }
     }
 
-    public long getOrderCount() {
-        return orderCount;
-    }
-
-    public double getTotalSalesAmount() {
-        return totalSalesAmount;
-    }
-
     public SalesStatisticsDTO getSummary() {
         long localCount;
         double localTotal;
@@ -64,5 +56,4 @@ public class SalesStatistics {
         }
         return new SalesStatisticsDTO(localCount, localTotal);
     }
-
 }
