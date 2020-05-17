@@ -1,18 +1,17 @@
 package com.ebay.salesstatsservice.service;
 
-import com.ebay.salesstatsservice.domainobject.SalesStatistics;
+import com.ebay.salesstatsservice.domain.SalesStatistics;
 import com.ebay.salesstatsservice.reactor.SchedulerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
+import javafx.util.Pair;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class DefaultSalesStatisticsService implements SalesStatisticsService {
@@ -21,7 +20,6 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
 
     private final SalesStatistics salesStatistics;
     private final AtomicLong idCounter;
-    private final Lock lock;
     private final Cache<String, Double> cache;
     private final SchedulerFactory schedulerFactory;
 
@@ -29,14 +27,8 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
         this.salesStatistics = new SalesStatistics();
         this.schedulerFactory = schedulerFactory;
         this.idCounter = new AtomicLong();
-        this.lock = new ReentrantLock(true);
         RemovalListener<String, Double> removalListener = it -> {
-            try {
-                lock.lock();
-                salesStatistics.decrement(it.getValue());
-            } finally {
-                lock.unlock();
-            }
+            salesStatistics.decrement(it.getValue());
         };
         this.cache = CacheBuilder.newBuilder()
                 .expireAfterWrite(DURATION_IN_SECOND, TimeUnit.SECONDS)
@@ -47,26 +39,15 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
     @Override
     public Mono<Void> feed(Mono<Double> salesAmount) {
         return salesAmount.flatMap(it -> {
-            try {
-                lock.lock();
-                salesStatistics.increment(it);
-                cache.put(createID(), it);
-            } finally {
-                lock.unlock();
-            }
+            salesStatistics.increment(it);
+            cache.put(createID(), it);
             return Mono.empty();
         }).subscribeOn(schedulerFactory.parallel()).then();
     }
 
-    public Mono<SalesStatistics> prepareSummary() {
-        return Mono.fromCallable(() -> {
-            try {
-                lock.lock();
-                return salesStatistics;
-            } finally {
-                lock.unlock();
-            }
-        }).subscribeOn(schedulerFactory.parallel());
+    @Override
+    public Mono<Pair<Long, Double>> prepareSummary() {
+        return Mono.fromCallable(salesStatistics::getView).subscribeOn(schedulerFactory.parallel());
     }
 
     /*
