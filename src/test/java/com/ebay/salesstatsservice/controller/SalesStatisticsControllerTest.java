@@ -22,7 +22,7 @@ class SalesStatisticsControllerTest {
     private WebTestClient webClient;
 
     @Test
-    public void it_should_feed_with_new_statistics() {
+    public void it_should_return_202_accepted_when_sales_requested_with_valid_form() {
         // given
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("sales_amount", "2");
@@ -43,15 +43,16 @@ class SalesStatisticsControllerTest {
     }
 
     @Test
-    public void it_return_bad_request_when_sales_amount_not_provided() {
+    public void it_should_return_400_bad_request_when_sales_requested_with_empty_form() {
         // Given
         String uri = "/api/v1/sales";
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 
         // when
         webClient.post()
                 .uri("/api/v1/sales")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(BodyInserters.fromFormData(new LinkedMultiValueMap<>()))
+                .body(BodyInserters.fromFormData(formData))
                 .exchange()
 
                 // then
@@ -63,7 +64,7 @@ class SalesStatisticsControllerTest {
     }
 
     @Test
-    public void it_should_return_statistics_json() {
+    public void it_should_return_200_ok_when_statistics_request() {
         // given
         String uri = "/api/v1/statistics";
 
