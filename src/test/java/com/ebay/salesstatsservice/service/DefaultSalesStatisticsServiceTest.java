@@ -11,9 +11,11 @@ class DefaultSalesStatisticsServiceTest {
 
     private final DefaultSalesStatisticsService salesStatisticsService;
 
+    private Integer ttlInMillis = 10_000;
+
     {
         ConfigProperties configProperties = new ConfigProperties();
-        configProperties.setTimeInSecond(Duration.ofSeconds(10));
+        configProperties.setTimeInSecond(Duration.ofMillis(ttlInMillis));
         salesStatisticsService = new DefaultSalesStatisticsService(configProperties);
     }
 
@@ -48,7 +50,7 @@ class DefaultSalesStatisticsServiceTest {
                     .expectComplete()
                     .verify();
         }
-        Thread.sleep(11000);
+        Thread.sleep(ttlInMillis);
         salesStatisticsService.cleanUp();
 
         // when
