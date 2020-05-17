@@ -47,7 +47,7 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
 
     @Override
     public Mono<Pair<Long, Double>> prepareSummary() {
-        return Mono.fromCallable(salesStatistics::getView).subscribeOn(schedulerFactory.parallel());
+        return Mono.fromCallable(salesStatistics::getSummary).subscribeOn(schedulerFactory.parallel());
     }
 
     /*

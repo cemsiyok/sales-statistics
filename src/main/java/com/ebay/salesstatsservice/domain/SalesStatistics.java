@@ -38,7 +38,7 @@ public class SalesStatistics {
         return totalSalesAmount;
     }
 
-    public Pair<Long, Double> getView() {
+    public Pair<Long, Double> getSummary() {
         long localCount;
         double localTotal;
         out:
