@@ -1,6 +1,6 @@
 package com.ebay.salesstatsservice.domain;
 
-import javafx.util.Pair;
+import com.ebay.salesstatsservice.model.SalesStatisticsDTO;
 
 import java.util.concurrent.locks.StampedLock;
 
@@ -38,7 +38,7 @@ public class SalesStatistics {
         return totalSalesAmount;
     }
 
-    public Pair<Long, Double> getSummary() {
+    public SalesStatisticsDTO getSummary() {
         long localCount;
         double localTotal;
         out:
@@ -61,7 +61,7 @@ public class SalesStatistics {
                 sl.unlockRead(stamp);
             }
         }
-        return new Pair<>(localCount, localTotal);
+        return new SalesStatisticsDTO(localCount, localTotal);
     }
 
 }

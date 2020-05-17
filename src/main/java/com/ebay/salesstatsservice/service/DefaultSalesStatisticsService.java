@@ -1,11 +1,11 @@
 package com.ebay.salesstatsservice.service;
 
 import com.ebay.salesstatsservice.domain.SalesStatistics;
+import com.ebay.salesstatsservice.model.SalesStatisticsDTO;
 import com.ebay.salesstatsservice.reactor.SchedulerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
-import javafx.util.Pair;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -46,7 +46,7 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
     }
 
     @Override
-    public Mono<Pair<Long, Double>> prepareSummary() {
+    public Mono<SalesStatisticsDTO> prepareSummary() {
         return Mono.fromCallable(salesStatistics::getSummary).subscribeOn(schedulerFactory.parallel());
     }
 
