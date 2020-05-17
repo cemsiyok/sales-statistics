@@ -2,11 +2,13 @@ package com.ebay.salesstatsservice.domain;
 
 import com.ebay.salesstatsservice.model.SalesStatisticsDTO;
 
+import java.text.DecimalFormat;
 import java.util.concurrent.locks.StampedLock;
 
 public class SalesStatistics {
 
     private static final int OPTIMISTIC_SPIN = 5;
+    private static final DecimalFormat df = new DecimalFormat("#.##");
     private final StampedLock sl = new StampedLock();
     private long orderCount;
     private double totalSalesAmount;
@@ -52,6 +54,6 @@ public class SalesStatistics {
                 sl.unlockRead(stamp);
             }
         }
-        return new SalesStatisticsDTO(localCount, localTotal);
+        return new SalesStatisticsDTO(localCount, Double.parseDouble(df.format(localTotal)));
     }
 }

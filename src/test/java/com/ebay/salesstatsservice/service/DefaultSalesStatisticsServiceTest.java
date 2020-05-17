@@ -1,52 +1,62 @@
 package com.ebay.salesstatsservice.service;
 
-import com.ebay.salesstatsservice.controller.SalesStatisticsController;
+import com.ebay.salesstatsservice.model.SalesStatisticsDTO;
+import com.ebay.salesstatsservice.properties.ConfigProperties;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyInserters;
+import reactor.test.StepVerifier;
 
-@ExtendWith(SpringExtension.class)
-@WebFluxTest(controllers = SalesStatisticsController.class)
-@Import(DefaultSalesStatisticsService.class)
+import java.time.Duration;
+
 class DefaultSalesStatisticsServiceTest {
 
-    @Autowired
-    private WebTestClient webClient;
+    private final DefaultSalesStatisticsService salesStatisticsService;
 
-    @Test
-    public void it_should() {
-        // GIVEN
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("sales_amount", "2");
-
-        // WHEN
-        webClient.post()
-                .uri("/api/v1/sales")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(BodyInserters.fromFormData(formData))
-                .exchange()
-                .expectStatus()
-                .isAccepted();
+    {
+        ConfigProperties configProperties = new ConfigProperties();
+        configProperties.setTimeInSecond(Duration.ofSeconds(10));
+        salesStatisticsService = new DefaultSalesStatisticsService(configProperties);
     }
 
     @Test
-    public void it_should_1() {
-        // GIVEN
+    void it_should_return_sales_statistics_snapshot() {
+        // given
+        double salesAmount = 10.11d;
+        double expectedTotalAmount = 0d;
+        long orderCount = 4_000;
+        for (int i = 0; i < orderCount; i++) {
+            StepVerifier.create(salesStatisticsService.feed(salesAmount))
+                    .expectComplete()
+                    .verify();
+            expectedTotalAmount += salesAmount;
+        }
+        // when
+        StepVerifier.create(salesStatisticsService.prepareSummary())
 
-        // WHEN
-        webClient.get()
-                .uri("/api/v1/statistics")
-                .exchange()
-                .expectStatus()
-                .isOk();
+                // then
+                .expectNext(new SalesStatisticsDTO(orderCount, Math.round(expectedTotalAmount)))
+                .expectComplete()
+                .verify();
     }
 
+    @Test
+    void it_should_return_sales_statistics_snapshot_when_all_tuples_expired() throws InterruptedException {
+        // given
+        double salesAmount = 10.11d;
+        long orderCount = 1000;
+        for (int i = 0; i < orderCount; i++) {
+            StepVerifier.create(salesStatisticsService.feed(salesAmount))
+                    .expectComplete()
+                    .verify();
+        }
+        Thread.sleep(11000);
+        salesStatisticsService.cleanUp();
+
+        // when
+        StepVerifier.create(salesStatisticsService.prepareSummary())
+
+                // then
+                .expectNext(new SalesStatisticsDTO(0L, 0d))
+                .expectComplete()
+                .verify();
+    }
 }

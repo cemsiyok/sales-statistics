@@ -2,6 +2,7 @@ package com.ebay.salesstatsservice.service;
 
 import com.ebay.salesstatsservice.domain.SalesStatistics;
 import com.ebay.salesstatsservice.model.SalesStatisticsDTO;
+import com.ebay.salesstatsservice.properties.ConfigProperties;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
@@ -10,24 +11,23 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class DefaultSalesStatisticsService implements SalesStatisticsService {
 
-    private static final int DURATION_IN_SECOND = 60;
-
+    private final ConfigProperties configProperties;
     private final SalesStatistics salesStatistics;
     private final AtomicLong idCounter;
     private final Cache<String, Double> cache;
 
-    public DefaultSalesStatisticsService() {
+    public DefaultSalesStatisticsService(ConfigProperties configProperties) {
+        this.configProperties = configProperties;
         this.salesStatistics = new SalesStatistics();
         this.idCounter = new AtomicLong();
         RemovalListener<String, Double> removalListener = it -> salesStatistics.decrement(it.getValue());
         this.cache = CacheBuilder.newBuilder()
-                .expireAfterWrite(DURATION_IN_SECOND, TimeUnit.SECONDS)
+                .expireAfterWrite(configProperties.getTimeInSecond())
                 .removalListener(removalListener)
                 .build();
     }
