@@ -2,13 +2,13 @@ package com.ebay.salesstatsservice.service;
 
 import com.ebay.salesstatsservice.domain.SalesStatistics;
 import com.ebay.salesstatsservice.model.SalesStatisticsDTO;
-import com.ebay.salesstatsservice.reactor.SchedulerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -21,11 +21,9 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
     private final SalesStatistics salesStatistics;
     private final AtomicLong idCounter;
     private final Cache<String, Double> cache;
-    private final SchedulerFactory schedulerFactory;
 
-    public DefaultSalesStatisticsService(SchedulerFactory schedulerFactory) {
+    public DefaultSalesStatisticsService() {
         this.salesStatistics = new SalesStatistics();
-        this.schedulerFactory = schedulerFactory;
         this.idCounter = new AtomicLong();
         RemovalListener<String, Double> removalListener = it -> salesStatistics.decrement(it.getValue());
         this.cache = CacheBuilder.newBuilder()
@@ -39,12 +37,13 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
         return Mono.fromRunnable(() -> {
             cache.put(createID(), salesAmount);
             salesStatistics.increment(salesAmount);
-        }).subscribeOn(schedulerFactory.parallel()).then();
+        }).subscribeOn(Schedulers.parallel()).then();
     }
 
     @Override
     public Mono<SalesStatisticsDTO> prepareSummary() {
-        return Mono.fromCallable(salesStatistics::getSummary).subscribeOn(schedulerFactory.parallel());
+        return Mono.fromCallable(salesStatistics::getSummary)
+                .subscribeOn(Schedulers.parallel());
     }
 
     /*

@@ -1,12 +1,10 @@
 package com.ebay.salesstatsservice.service;
 
 import com.ebay.salesstatsservice.controller.SalesStatisticsController;
-import com.ebay.salesstatsservice.reactor.SchedulerFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -22,9 +20,6 @@ class DefaultSalesStatisticsServiceTest {
 
     @Autowired
     private WebTestClient webClient;
-
-    @MockBean
-    SchedulerFactory repository;
 
     @Test
     public void it_should() {
