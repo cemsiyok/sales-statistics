@@ -35,7 +35,6 @@ public class SalesStatistics {
         long localCount;
         double localTotal;
         out:
-        // try a few times to do an optimistic read
         {
             for (int i = 0; i < OPTIMISTIC_SPIN; i++) {
                 long stamp = sl.tryOptimisticRead();
@@ -45,7 +44,6 @@ public class SalesStatistics {
                     break out;
                 }
             }
-            // pessimistic read
             long stamp = sl.readLock();
             try {
                 localCount = orderCount;

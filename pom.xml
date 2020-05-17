@@ -12,7 +12,7 @@
     <artifactId>salesstatsservice-cemsiyok</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Sales Statistics Service</name>
-    <description>Ebay Coding Challange</description>
+    <description>Ebay Coding Challenge</description>
 
     <properties>
         <java.version>11</java.version>
