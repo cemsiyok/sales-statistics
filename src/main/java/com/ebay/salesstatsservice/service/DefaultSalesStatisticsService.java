@@ -1,7 +1,6 @@
 package com.ebay.salesstatsservice.service;
 
-import com.ebay.salesstatsservice.mapper.SalesStatisticsMapper;
-import com.ebay.salesstatsservice.model.SalesStatisticsResponse;
+import com.ebay.salesstatsservice.domainobject.SalesStatistics;
 import com.ebay.salesstatsservice.reactor.SchedulerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -20,22 +19,21 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
 
     private static final int DURATION_IN_SECOND = 60;
 
-    private long orderCount;
-    private double totalSalesAmount;
+    private final SalesStatistics salesStatistics;
     private final AtomicLong idCounter;
     private final Lock lock;
     private final Cache<String, Double> cache;
     private final SchedulerFactory schedulerFactory;
 
     public DefaultSalesStatisticsService(SchedulerFactory schedulerFactory) {
+        this.salesStatistics = new SalesStatistics();
         this.schedulerFactory = schedulerFactory;
         this.idCounter = new AtomicLong();
         this.lock = new ReentrantLock(true);
         RemovalListener<String, Double> removalListener = it -> {
             try {
                 lock.lock();
-                orderCount--;
-                totalSalesAmount -= it.getValue();
+                salesStatistics.decrement(it.getValue());
             } finally {
                 lock.unlock();
             }
@@ -51,8 +49,7 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
         return salesAmount.flatMap(it -> {
             try {
                 lock.lock();
-                orderCount++;
-                totalSalesAmount += it;
+                salesStatistics.increment(it);
                 cache.put(createID(), it);
             } finally {
                 lock.unlock();
@@ -61,11 +58,11 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
         }).subscribeOn(schedulerFactory.parallel()).then();
     }
 
-    public Mono<SalesStatisticsResponse> prepareSummary() {
+    public Mono<SalesStatistics> prepareSummary() {
         return Mono.fromCallable(() -> {
             try {
                 lock.lock();
-                return SalesStatisticsMapper.makeSalesStatisticsResponse(totalSalesAmount, orderCount);
+                return salesStatistics;
             } finally {
                 lock.unlock();
             }

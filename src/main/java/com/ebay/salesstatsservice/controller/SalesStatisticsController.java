@@ -1,5 +1,6 @@
 package com.ebay.salesstatsservice.controller;
 
+import com.ebay.salesstatsservice.mapper.SalesStatisticsMapper;
 import com.ebay.salesstatsservice.model.SalesStatisticsResponse;
 import com.ebay.salesstatsservice.service.SalesStatisticsService;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,6 @@ public class SalesStatisticsController {
 
     @GetMapping("/statistics")
     public Mono<SalesStatisticsResponse> getStatistics() {
-        return salesStatisticsService.prepareSummary();
+        return salesStatisticsService.prepareSummary().map(SalesStatisticsMapper::makeSalesStatisticsResponse);
     }
 }
