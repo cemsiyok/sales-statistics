@@ -23,27 +23,60 @@ class SalesStatisticsControllerTest {
 
     @Test
     public void it_should_feed_with_new_statistics() {
+        // given
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("sales_amount", "2");
+        String uri = "/api/v1/sales";
 
+        // when
         webClient.post()
-                .uri("/api/v1/sales")
+                .uri(uri)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData(formData))
                 .exchange()
+
+                // then
                 .expectStatus()
-                .isAccepted();
+                .isAccepted()
+                .expectBody()
+                .isEmpty();
+    }
+
+    @Test
+    public void it_return_bad_request_when_sales_amount_not_provided() {
+        // Given
+        String uri = "/api/v1/sales";
+
+        // when
+        webClient.post()
+                .uri("/api/v1/sales")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(new LinkedMultiValueMap<>()))
+                .exchange()
+
+                // then
+                .expectStatus()
+                .isBadRequest()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("400")
+                .jsonPath("$.error").isEqualTo("Bad Request");
     }
 
     @Test
     public void it_should_return_statistics_json() {
+        // given
+        String uri = "/api/v1/statistics";
+
+        // when
         webClient.get()
-                .uri("/api/v1/statistics")
+                .uri(uri)
                 .exchange()
+
+                // then
                 .expectStatus()
                 .isOk()
                 .expectBody()
-                .jsonPath("total_sales_amount").isEqualTo("0.00")
-                .jsonPath("average_amount_per_order").isEqualTo("0.00");
+                .jsonPath("$.total_sales_amount").isEqualTo("0.00")
+                .jsonPath("$.average_amount_per_order").isEqualTo("0.00");
     }
 }
