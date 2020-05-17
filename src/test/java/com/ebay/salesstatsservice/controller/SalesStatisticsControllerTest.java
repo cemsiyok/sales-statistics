@@ -1,5 +1,6 @@
 package com.ebay.salesstatsservice.controller;
 
+import com.ebay.salesstatsservice.properties.ConfigProperties;
 import com.ebay.salesstatsservice.service.DefaultSalesStatisticsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +16,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(controllers = SalesStatisticsController.class)
-@Import(DefaultSalesStatisticsService.class)
+@Import({DefaultSalesStatisticsService.class, ConfigProperties.class})
 class SalesStatisticsControllerTest {
 
     @Autowired
