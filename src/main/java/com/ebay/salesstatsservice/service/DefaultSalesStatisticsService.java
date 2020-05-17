@@ -27,9 +27,7 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
         this.salesStatistics = new SalesStatistics();
         this.schedulerFactory = schedulerFactory;
         this.idCounter = new AtomicLong();
-        RemovalListener<String, Double> removalListener = it -> {
-            salesStatistics.decrement(it.getValue());
-        };
+        RemovalListener<String, Double> removalListener = it -> salesStatistics.decrement(it.getValue());
         this.cache = CacheBuilder.newBuilder()
                 .expireAfterWrite(DURATION_IN_SECOND, TimeUnit.SECONDS)
                 .removalListener(removalListener)
@@ -61,5 +59,4 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
     private String createID() {
         return String.valueOf(idCounter.incrementAndGet());
     }
-
 }
