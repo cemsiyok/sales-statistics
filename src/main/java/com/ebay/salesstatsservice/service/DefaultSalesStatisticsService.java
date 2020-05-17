@@ -72,6 +72,10 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
         }).subscribeOn(schedulerFactory.parallel());
     }
 
+    /*
+     If your cache is high-throughput, then you don't have to worry about
+     performing cache maintenance to clean up expired entries and the like.
+     */
     @Scheduled(initialDelay = 60000, fixedDelay = 1000)
     public void cleanUp() {
         cache.cleanUp();
