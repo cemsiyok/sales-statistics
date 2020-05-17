@@ -5,7 +5,7 @@ import javafx.util.Pair;
 import java.util.concurrent.locks.StampedLock;
 
 public class SalesStatistics {
-    private static final int RETRIES = 5;
+    private static final int OPTIMISTIC_SPIN = 5;
     private final StampedLock sl = new StampedLock();
     private long orderCount;
     private double totalSalesAmount;
@@ -44,7 +44,7 @@ public class SalesStatistics {
         out:
         // try a few times to do an optimistic read
         {
-            for (int i = 0; i < RETRIES; i++) {
+            for (int i = 0; i < OPTIMISTIC_SPIN; i++) {
                 long stamp = sl.tryOptimisticRead();
                 localCount = orderCount;
                 localTotal = totalSalesAmount;
