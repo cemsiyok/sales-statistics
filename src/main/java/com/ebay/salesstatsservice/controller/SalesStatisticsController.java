@@ -25,9 +25,9 @@ public class SalesStatisticsController {
     @PostMapping(value = "/sales", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Mono<Void> createSale(ServerWebExchange exchange) {
-        Mono<Double> salesAmount = exchange.getFormData().flatMap(formData -> {
+        Mono<Double> salesAmount = exchange.getFormData().map(formData -> {
             String parameterValue = formData.getFirst("sales_amount");
-            return Mono.just(Double.parseDouble(parameterValue));
+            return Double.parseDouble(parameterValue);
         });
         return salesStatisticsService.feed(salesAmount);
     }
