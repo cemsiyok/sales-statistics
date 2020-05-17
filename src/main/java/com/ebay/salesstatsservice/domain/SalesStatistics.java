@@ -5,6 +5,7 @@ import com.ebay.salesstatsservice.model.SalesStatisticsDTO;
 import java.util.concurrent.locks.StampedLock;
 
 public class SalesStatistics {
+
     private static final int OPTIMISTIC_SPIN = 5;
     private final StampedLock sl = new StampedLock();
     private long orderCount;
