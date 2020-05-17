@@ -50,7 +50,7 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
     }
 
     /*
-     If your cache is high-throughput, then you don't have to worry about
+     If our cache is high-throughput, then we don't have to worry about
      performing cache maintenance to clean up expired entries and the like.
      */
     @Scheduled(initialDelay = 60000, fixedDelay = 1000)
