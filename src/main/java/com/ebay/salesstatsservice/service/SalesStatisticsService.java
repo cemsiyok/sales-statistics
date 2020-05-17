@@ -5,7 +5,7 @@ import reactor.core.publisher.Mono;
 
 public interface SalesStatisticsService {
 
-    Mono<Void> feed(Mono<Double> salesAmount);
+    Mono<Void> feed(Double salesAmount);
 
     Mono<SalesStatisticsDTO> prepareSummary();
 }

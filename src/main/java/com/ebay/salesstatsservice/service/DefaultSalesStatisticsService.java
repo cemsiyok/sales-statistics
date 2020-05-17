@@ -37,11 +37,10 @@ public class DefaultSalesStatisticsService implements SalesStatisticsService {
     }
 
     @Override
-    public Mono<Void> feed(Mono<Double> salesAmount) {
-        return salesAmount.flatMap(it -> {
-            salesStatistics.increment(it);
-            cache.put(createID(), it);
-            return Mono.empty();
+    public Mono<Void> feed(Double salesAmount) {
+        return Mono.fromRunnable(() -> {
+            cache.put(createID(), salesAmount);
+            salesStatistics.increment(salesAmount);
         }).subscribeOn(schedulerFactory.parallel()).then();
     }
 

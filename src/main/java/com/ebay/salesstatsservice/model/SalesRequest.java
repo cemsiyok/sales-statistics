@@ -1,27 +1,17 @@
 package com.ebay.salesstatsservice.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.validation.constraints.NotNull;
 
 public class SalesRequest {
 
     @NotNull
-    private double salesAmount;
+    private Double sales_amount;
 
-    public SalesRequest(double salesAmount) {
-        this.salesAmount = salesAmount;
+    public Double getSales_amount() {
+        return sales_amount;
     }
 
-    public SalesRequest() {
-    }
-
-    public double getSalesAmount() {
-        return salesAmount;
-    }
-
-    @JsonProperty("sales_amount")
-    public void setSalesAmount(double salesAmount) {
-        this.salesAmount = salesAmount;
+    public void setSales_amount(Double sales_amount) {
+        this.sales_amount = sales_amount;
     }
 }
